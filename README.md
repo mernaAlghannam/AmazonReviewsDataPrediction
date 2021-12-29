@@ -1,5 +1,5 @@
 # AmazonReviewsDataPrediction
-The purpose of the project is the predict the rating of a Amazon product based on reviews.
+The purpose of the project is the predict the rating of an Amazon product based on reviews.
 
 Code Instructions <br>
 1- Download the train.csv and test.csv files from Kaggle into the data/ folder <br>
