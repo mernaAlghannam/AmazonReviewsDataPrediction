@@ -1,7 +1,7 @@
 # AmazonReviewsDataPrediction
 The purpose of the project is the predict the rating of an Amazon product based on reviews.
 
-32 out of 170 in a kaggle competition https://www.kaggle.com/competitions/cs-506-midterm-a1-b1/leaderboard
+**#32 out of 170 in a kaggle competition** https://www.kaggle.com/competitions/cs-506-midterm-a1-b1/leaderboard
 
 
 **File descriptions:**
