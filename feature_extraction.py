@@ -1,3 +1,9 @@
+# more code and details about the project can be found here https://github.com/mernaAlghannam/AmazonReviewsDataPrediction.git
+# This code extracts features for the review dataset necessary for predicting amazon rating based on reviews
+# data cleaning and analysis code used before feature extraction can be found on github link below
+# https://github.com/mernaAlghannam/AmazonReviewsDataPrediction/blob/main/2_Amazon_Review_Data_Visulization.ipynb
+# model code can be found here https://github.com/mernaAlghannam/AmazonReviewsDataPrediction/blob/main/predict-svc.py
+
 import pandas as pd
 import numpy as np 
 import pandas as pd
@@ -70,11 +76,13 @@ def processText(text):
     return text
 
 def count_en(text):
+    nlp = en_core_web_sm.load()
     doc = nlp(text)
     return len(doc.ents)
 
 def process(df):
     # This is where you can do all your processing
+
 
     df['Helpfulness'] = df['HelpfulnessNumerator'] / df['HelpfulnessDenominator']
     df['Helpfulness'] = df['Helpfulness'].fillna(0)
@@ -82,31 +90,42 @@ def process(df):
     df['User_label'] = pd.factorize(df['UserId'])[0]
 
     df['temp_s'] = df['Score']
-    #count upper in Summary
+    #count uppercase words in Summary (they indicate extreme anger or happiness)
     df['upper'] = df['Text'].apply(lambda x: len([x for x in x.split() if x.isupper()]))
-    #count upper in text
+    #count upper in text (they indicate extreme anger or happiness)
     df['upper'] = df['Summary'].apply(lambda x: len([x for x in x.split() if x.isupper()]))
 
     df['Text'] = df.Text.fillna('')
     df['Text'] = df['Text'].apply(lambda x: " ".join(x.lower() for x in x.split()))
     pol = lambda x: TextBlob(x).sentiment.polarity
+    #feature that indicate the text's possible polarity (each review is marked as either neg or pos)
     df['polarity'] = df['Text'].apply(pol) 
     df['Text'] = processText(df['Text'].astype(str))
-    df['Text']= df['Text'].astype(str) # Make sure about the correct data type
+    df['Text']= df['Text'].astype(str) 
 
     df['Summary'] = df.Summary.fillna('')
     df['Summary'] = df['Summary'].apply(lambda x: " ".join(x.lower() for x in x.split()))
     pol = lambda x: TextBlob(x).sentiment.polarity
     df['Summary'] = df['Summary'].apply(pol)
     df['Summary'] = processText(df['Summary'].astype(str))
-    df['Summary']= df['Summary'].astype(str) # Make sure about the correct data type
-    nlp = en_core_web_sm.load()
+    df['Summary']= df['Summary'].astype(str) 
+    # Named entity recognition (NER) — sometimes referred to as entity chunking, extraction, or identification —
+    # is the task of identifying and categorizing key information (entities) in text. An entity can be any word or 
+    # series of words that consistently refers to the same thing. Every detected entity is classified into a predetermined category. 
+    # For example, an NER machine learning (ML) 
+    # model might detect the word “super.AI” in a text and classify it as a “Company”.
     df['entity_count'] =  df['Text'].fillna('').apply(count_en)
+    # my analysis (https://github.com/mernaAlghannam/AmazonReviewsDataPrediction/blob/main/2_Amazon_Review_Data_Visulization.ipynb) indicates
+    #  more intellectuaal reviews should be ranked as more relavant for the model
     df['intellectual'] = df['entity_count']/df['word_count']
 
+    # words in reviews that I found in analysis generaly correlates to revies that got 5 start
     pos_dict = ['great', 'best', 'love', 'fun']
+    # words in reviews that I found in analysis generaly correlates to revies that got 1 start
     neg_dict = ['awful', 'bad', 'waste', 'boring', 'better']
+    # create a feature that extracts all of the terms from text reviews if they are in possitive dictionary
     df['very_neg'] = df['Text'].fillna('').apply(lambda x: len([x for x in x.split() if x in neg_dict]))
+    # create a feature that extracts all of the terms from text reviews if they are in negative dictionary
     df['very_pos'] = df['Text'].fillna('').apply(lambda x: len([x for x in x.split() if x in pos_dict]))
 
     return df
@@ -133,4 +152,6 @@ trainX =  train_processed[train_processed['Score'].notnull()]
 
 testX.to_csv("./data/X_test.csv", index=False)
 trainX.to_csv("./data/X_train.csv", index=False)
+
+
 
